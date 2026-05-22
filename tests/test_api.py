@@ -7,7 +7,7 @@ from main import app
 import db
 
 client = TestClient(app)
-TEST_DATABASE_URL = "postgresql://calgoneq@localhost/budget_test"
+TEST_DATABASE_URL = "postgresql+asyncpg://calgoneq@localhost/budget_test"
 test_engine = create_engine(TEST_DATABASE_URL)
 
 @pytest.fixture(autouse=True)

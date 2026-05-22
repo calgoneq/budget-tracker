@@ -1,9 +1,9 @@
-from sqlalchemy import create_async_engine
-from sqlalchemy.orm import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import select
 
 from models_db import Base, TransactionModel
 
-DATABASE_URL = "postgresql://calgoneq@localhost/budget_tracker"
+DATABASE_URL = "postgresql+asyncpg://calgoneq@localhost/budget_tracker"
 engine = create_async_engine(DATABASE_URL)
 
 async def init_db() -> None:
@@ -12,13 +12,15 @@ async def init_db() -> None:
 
 async def get_all_transactions(kategoria: str | None) -> list[dict]:
     async with AsyncSession(engine) as session:
-        if kategoria is not None:
-            rows = await session.query(TransactionModel).filter_by(kategoria=kategoria).all()
-        else:
-            rows = await session.query(TransactionModel).all()
+        stmt = select(TransactionModel)
+        if kategoria:
+            stmt = stmt.where(TransactionModel.kategoria == kategoria)
+        
+        result = await session.execute(stmt)
+        rows = result.scalars().all()
+        response: list[dict] = [{"id": row.id, "sklep": row.sklep, "kwota": row.kwota, "kategoria": row.kategoria, "data": row.data, "notatka": row.notatka} for row in rows]
 
-        list_of_dicts: list[dict] = [{"id": item.id, "sklep": item.sklep, "kwota": item.kwota, "kategoria": item.kategoria, "data": item.data, "notatka": item.notatka} for item in rows]
-        return list_of_dicts
+        return response
         
 async def get_transaction_by_id(transaction_id: int) -> dict | None:
     async with AsyncSession(engine) as session:
@@ -33,7 +35,7 @@ async def get_transaction_by_id(transaction_id: int) -> dict | None:
 async def add_transaction(transaction: dict) -> dict:
     async with AsyncSession(engine) as session:
         new_t = TransactionModel(sklep=transaction["sklep"], kwota=transaction["kwota"], kategoria=transaction["kategoria"], data=transaction["data"], notatka=transaction.get("notatka"))
-        await session.add(new_t)
+        session.add(new_t)
         await session.commit()
         await session.refresh(new_t)
         response: dict = {"id": new_t.id, "sklep": new_t.sklep, "kwota": new_t.kwota, "kategoria": new_t.kategoria, "data": new_t.data, "notatka": new_t.notatka}
