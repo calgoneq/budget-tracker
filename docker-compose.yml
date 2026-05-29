@@ -1,0 +1,39 @@
+services:
+
+  web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    container_name: budget-tracker
+
+    ports:
+      - "8000:8000"
+    
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DB_HOST=db-postgres
+      - DB_USER=calgoneq
+      - DB_PASSWORD=admin
+      - DB_NAME=budget_tracker
+
+    depends_on:
+      - db-postgres
+
+    restart: always
+  
+  db-postgres:
+    image: postgres:15-alpine
+
+    container_name: budget-tracker-postgres-db
+  
+    environment:
+      POSTGRES_USER: calgoneq
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: budget_tracker
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
