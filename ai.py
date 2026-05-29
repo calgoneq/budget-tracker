@@ -11,7 +11,7 @@ async def generate_summary(transactions: list[dict]) -> str:
 
     lines = []
     for t in transactions:
-        line = f"\n- Sklep: {t["sklep"]}, Kwota: {t["kwota"]} PLN, Kategoria: {t["kategoria"]}, Data: {t["data"]}"
+        line = f"\n- Sklep: {t['sklep']}, Kwota: {t['kwota']} PLN, Kategoria: {t['kategoria']}, Data: {t['data']}"
         lines.append(line) 
         
     prompt = f"""Oto lista moich wydatków:

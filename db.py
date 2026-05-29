@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 from models_db import Base, TransactionModel
 
-DATABASE_URL = "postgresql+asyncpg://calgoneq@localhost/budget_tracker"
+DATABASE_URL = "postgresql+asyncpg://calgoneq:admin@db-postgres/budget_tracker"
 engine = create_async_engine(DATABASE_URL)
 
 async def init_db() -> None:
